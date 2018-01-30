@@ -1,37 +1,34 @@
 #' Convert a SVG file to a spatstat psp object.
 #'
-#'@param svgfile File path of the svg file to convert
-#'@param owin Window of the psp
-#'@param clip.owin Should the returned psp cipped to owin
-#'@param rescale Should data recaled to owin size (otherwise expressed in pixels)
+#'@param svgfile File path of the svg file to convert.
+#'@param owin Window of the psp.
+#'@param clip.owin Should the returned psp clipped to owin.
+#'@param rescale Should data recaled to owin size (otherwise expressed in pixels).
 #'@param marks Add marks to segments:, F/0: no marks, T/1 all segments have a numeric mark (randomly distributed among segments), 2: all segments have a mark depending on their position in the svg file.
-#'@param bezier What to do with Bezier curves. If NULL, bezier curves are converted to bezier polygons (i.e. goes through all control points). If numeric, Bezier curves are converted to linear segments, following the De Casteljau algorithm. bezier=1 draws a straight line from the start of the bezier curve to its end, bezier = 2 draws a straight line from the start to the middle of the curve and then to the end...
+#'@param bezier What to do with Bezier curves. If NULL, bezier curves are converted to bezier polygons (i.e. goes through all control points). If numeric, Bezier curves are converted to linear segments, following the De Casteljau algorithm. \code{bezier}=0 or \code{bezier}=1 draws a straight line from the start of the bezier curve to its end, \code{bezier}=2 draws a straight line from the start to the middle of the curve and then to the end...
 #'@param upward should all segments points upward.
 #'@param rightward should all segments points to the right of the image.
 #'@return A psp object
 svg2psp = function(svgfile,owin=NULL,bezier=0,marks=F,maxlength=NULL,connect = F, upward=T,rightward=F,conn.radius=NULL,conn.angle=NULL,clip.owin=F,rescale=!is.null(owin)) {
 
-  require(XML)
-  require(spatstat)
-
   marks=as.numeric(marks)
 
-  datasvg = htmlParse(svgfile)
+  datasvg = XML::htmlParse(svgfile)
 
   svgtranslate = c(0,0)
   svgscale = c(1,1)
 
   #Getting info from svgfile
 
-  svgwidth = xpathApply(datasvg, "//svg", xmlGetAttr, "width")
-  svgheight= xpathApply(datasvg, "//svg", xmlGetAttr, "height")
+  svgwidth = XML::xpathApply(datasvg, "//svg", XML::xmlGetAttr, "width")
+  svgheight= XML::xpathApply(datasvg, "//svg", XML::xmlGetAttr, "height")
 
   svgunits = gsub("[0-9]","",svgwidth)
   svgwidth=as.numeric(gsub("[a-zA-Z]","",svgwidth))
   svgheight=as.numeric(gsub("[a-zA-Z]","",svgheight))
 
-  if (!is.null(unlist(xpathApply(datasvg, "//g", xmlGetAttr, "transform")))) {
-    svgtransform = unlist(strsplit(unlist(xpathApply(datasvg, "//g", xmlGetAttr, "transform"))," "))
+  if (!is.null(unlist(XML::xpathApply(datasvg, "//g", XML::xmlGetAttr, "transform")))) {
+    svgtransform = unlist(strsplit(unlist(XML::xpathApply(datasvg, "//g", XML::xmlGetAttr, "transform"))," "))
     svgtranslate = svgtransform[grep("translate",svgtransform)]
     svgtranslate = as.numeric(unlist(strsplit(gsub(")","",gsub("translate(","",svgtranslate,fixed=T),fixed=T),",")))
     if (length(svgtranslate)==1) {svgtranslate = c(svgtranslate,0)}
@@ -41,7 +38,7 @@ svg2psp = function(svgfile,owin=NULL,bezier=0,marks=F,maxlength=NULL,connect = F
   }
   #operating on paths
   lpath = list()
-  paths = xpathApply(datasvg, "//path", xmlGetAttr, "d")
+  paths = XML::xpathApply(datasvg, "//path", XML::xmlGetAttr, "d")
   paths = gsub("([a-zA-Z])", " \\1 \\2", paths)
 
   for (i in 1:length(paths)) {
@@ -132,7 +129,7 @@ svg2psp = function(svgfile,owin=NULL,bezier=0,marks=F,maxlength=NULL,connect = F
                    oldpos = pos
                  }
                }
-               if (is.null(bezier) || bezier == 1) {
+               if (is.null(bezier) || bezier <= 1) {
                 pos = pos+as.numeric(p[(lgt-1):lgt])
                } else {
                  pos = b30
@@ -260,10 +257,10 @@ svg2psp = function(svgfile,owin=NULL,bezier=0,marks=F,maxlength=NULL,connect = F
 
 }
 
-datapsp = as.psp(lpath[[1]],window=owin(c(0,svgwidth),c(0,svgheight)),check=F)
+datapsp = spatstat::as.psp(lpath[[1]],window=spatstat::owin(c(0,svgwidth),c(0,svgheight)),check=F)
 if (length(lpath)>1) {
   for (i in 2:length(lpath)) {
-    datapsp = superimpose(datapsp,as.psp(lpath[[i]],window=owin(c(0,svgwidth),c(0,svgheight)),check=F))
+    datapsp = spatstat::superimpose(datapsp,spatstat::as.psp(lpath[[i]],window=spatstat::owin(c(0,svgwidth),c(0,svgheight)),check=F))
   }
 }
 
@@ -274,34 +271,34 @@ if (!is.null(maxlength)) {
 
 # changing orientation of segments of cell borders to point upwards
 if(upward) {
-  datapsp=superimpose(
+  datapsp=spatstat::superimpose(
     datapsp[datapsp$ends$y1>=datapsp$ends$y0],
-    as.psp(cbind(x0=datapsp[datapsp$ends$y1<datapsp$ends$y0]$ends$x1,
+    spatstat::as.psp(cbind(x0=datapsp[datapsp$ends$y1<datapsp$ends$y0]$ends$x1,
                  y0=datapsp[datapsp$ends$y1<datapsp$ends$y0]$ends$y1,
                  x1=datapsp[datapsp$ends$y1<datapsp$ends$y0]$ends$x0,
                  y1=datapsp[datapsp$ends$y1<datapsp$ends$y0]$ends$y0),
            marks =datapsp[datapsp$ends$y1<datapsp$ends$y0]$marks,
-           window=as.owin(datapsp)))
+           window=spatstat::as.owin(datapsp)))
 }
 if (rightward) {
-  datapsp=superimpose(
+  datapsp=spatstat::superimpose(
     datapsp[datapsp$ends$x1>=datapsp$ends$x0],
-    as.psp(cbind(x0=datapsp[datapsp$ends$x1<datapsp$ends$x0]$ends$x1,
+    spatstat::as.psp(cbind(x0=datapsp[datapsp$ends$x1<datapsp$ends$x0]$ends$x1,
                  y0=datapsp[datapsp$ends$x1<datapsp$ends$x0]$ends$y1,
                  x1=datapsp[datapsp$ends$x1<datapsp$ends$x0]$ends$x0,
                  y1=datapsp[datapsp$ends$x1<datapsp$ends$x0]$ends$y0),
            marks =datapsp[datapsp$ends$x1<datapsp$ends$x0]$marks,
-           window=as.owin(datapsp)))
+           window=spatstat::as.owin(datapsp)))
 }
 
 if (connect) {
   datapsp = connectset.psp(datapsp,conn.radius=conn.radius,conn.angle=conn.angle)
 }
 if (!marks) {
-  datapsp=unmark(datapsp)
+  datapsp=spatstat::unmark(datapsp)
 }
 if (marks==1) {
-  marks(datapsp) = sample(1:datapsp$n)
+  spatstat::marks(datapsp) = sample(1:datapsp$n)
 }
   if (!is.null(owin)) {
     if (rescale) {
@@ -312,7 +309,7 @@ if (marks==1) {
     }
   }
 
-  datapsp= datapsp[which(lengths.psp(datapsp)>0)]
+  datapsp= datapsp[which(spatstat::lengths.psp(datapsp)>0)]
 
 	return(datapsp)
 }
