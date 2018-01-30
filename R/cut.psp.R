@@ -3,6 +3,7 @@
 #'@param datapsp PSP object to be cut
 #'@param maxlength Maximum length of segments in the returned psp object
 #'@return Returns a new psp object with segments length of \code{maxlength} a max.
+#'#'@export
 cut.psp = function(datapsp,maxlength) {
 
   pts = data.frame(x0 = NA, y0 = NA,x1 = NA,y1 = NA,mark=NA)

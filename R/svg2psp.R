@@ -9,6 +9,7 @@
 #'@param upward should all segments points upward.
 #'@param rightward should all segments points to the right of the image.
 #'@return A psp object
+#'@export
 svg2psp = function(svgfile,owin=NULL,bezier=0,marks=F,maxlength=NULL,connect = F, upward=T,rightward=F,conn.radius=NULL,conn.angle=NULL,clip.owin=F,rescale=!is.null(owin)) {
 
   marks=as.numeric(marks)

@@ -2,6 +2,7 @@
 #'@param psp spatstat psp object
 #'@param conn.radius segments having ends separated than less then conn.radius will be assumed to belong to the same set
 #'@param conn.angle maximum angle between segments to belong to the same set
+#'@export
 connectset.psp = function(psp,conn.radius=0,conn.angle=pi/4) {
   addmarks=F
   datapsp = spatstat::selfcut.psp(psp)
