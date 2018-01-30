@@ -9,11 +9,11 @@ svg2psp(svgfile, owin = NULL, bezier = 0, marks = F, maxlength = NULL,
   conn.angle = NULL, clip.owin = F, rescale = !is.null(owin))
 }
 \arguments{
-\item{svgfile}{File path of the svg file to convert}
+\item{svgfile}{File path of the svg file to convert.}
 
-\item{owin}{Window of the psp}
+\item{owin}{Window of the psp.}
 
-\item{bezier}{What to do with Bezier curves. If NULL, bezier curves are converted to bezier polygons (i.e. goes through all control points). If numeric, Bezier curves are converted to linear segments, following the De Casteljau algorithm. bezier=1 draws a straight line from the start of the bezier curve to its end, bezier = 2 draws a straight line from the start to the middle of the curve and then to the end...}
+\item{bezier}{What to do with Bezier curves. If NULL, bezier curves are converted to bezier polygons (i.e. goes through all control points). If numeric, Bezier curves are converted to linear segments, following the De Casteljau algorithm. \code{bezier}=0 or \code{bezier}=1 draws a straight line from the start of the bezier curve to its end, \code{bezier}=2 draws a straight line from the start to the middle of the curve and then to the end...}
 
 \item{marks}{Add marks to segments:, F/0: no marks, T/1 all segments have a numeric mark (randomly distributed among segments), 2: all segments have a mark depending on their position in the svg file.}
 
@@ -21,9 +21,9 @@ svg2psp(svgfile, owin = NULL, bezier = 0, marks = F, maxlength = NULL,
 
 \item{rightward}{should all segments points to the right of the image.}
 
-\item{clip.owin}{Should the returned psp cipped to owin}
+\item{clip.owin}{Should the returned psp clipped to owin.}
 
-\item{rescale}{Should data recaled to owin size (otherwise expressed in pixels)}
+\item{rescale}{Should data recaled to owin size (otherwise expressed in pixels).}
 }
 \value{
 A psp object
