@@ -1,14 +1,15 @@
 #' Convert a SVG file to a spatstat psp object.
 #'
-#'@param svgfile File path of the svg file to convert.
-#'@param owin Window of the psp.
-#'@param clip.owin Should the returned psp clipped to owin.
-#'@param rescale Should data recaled to owin size (otherwise expressed in pixels).
-#'@param marks Add marks to segments:, F/0: no marks, T/1 all segments have a numeric mark (randomly distributed among segments), 2: all segments have a mark depending on their position in the svg file.
-#'@param bezier What to do with Bezier curves. If NULL, bezier curves are converted to bezier polygons (i.e. goes through all control points). If numeric, Bezier curves are converted to linear segments, following the De Casteljau algorithm. \code{bezier}=0 or \code{bezier}=1 draws a straight line from the start of the bezier curve to its end, \code{bezier}=2 draws a straight line from the start to the middle of the curve and then to the end...
-#'@param upward should all segments points upward.
-#'@param rightward should all segments points to the right of the image.
-#'@return A psp object
+#' @param svgfile File path of the svg file to convert.
+#' @param owin Window of the psp.
+#' @param clip.owin Should the returned psp clipped to owin.
+#' @param rescale Should data recaled to owin size (otherwise expressed in pixels).
+#' @param marks Add marks to segments:, F/0: no marks, T/1 all segments have a numeric mark (randomly distributed among segments), 2: all segments have a mark depending on their position in the svg file.
+#' @param bezier What to do with Bezier curves. If NULL, bezier curves are converted to bezier polygons (i.e. goes through all control points). If numeric, Bezier curves are converted to linear segments, following the De Casteljau algorithm. \code{bezier}=0 or \code{bezier}=1 draws a straight line from the start of the bezier curve to its end, \code{bezier}=2 draws a straight line from the start to the middle of the curve and then to the end...
+#' @param upward should all segments points upward.
+#' @param rightward should all segments points to the right of the image.
+#' @return A psp object
+#' @export
 svg2psp = function(svgfile,owin=NULL,bezier=0,marks=F,maxlength=NULL,connect = F, upward=T,rightward=F,conn.radius=NULL,conn.angle=NULL,clip.owin=F,rescale=!is.null(owin)) {
 
   marks=as.numeric(marks)
