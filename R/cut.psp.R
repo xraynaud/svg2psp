@@ -3,6 +3,10 @@
 #' @param datapsp PSP object to be cut
 #' @param maxlength Maximum length of segments in the returned psp object
 #' @return Returns a new psp object with segments length of \code{maxlength} a max.
+#' @examples
+#' svgfile = system.file("extdata","SVG.svg", package = "svg2psp") 
+#' data = svg2psp(svgfile,reverse=T,rescale=T) # 217 segments
+#' cutdata = cut(data,1) # 679 segments
 #' @export
 cut.psp = function(datapsp,maxlength) {
 

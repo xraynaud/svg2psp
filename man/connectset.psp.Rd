@@ -4,15 +4,18 @@
 \alias{connectset.psp}
 \title{Adds marks to connected segments in a psp}
 \usage{
-connectset.psp(psp, conn.radius = 0, conn.angle = pi/4)
+connectset.psp(psp, conn.radius = 0, conn.angle = 2 * pi)
 }
 \arguments{
-\item{psp}{spatstat psp object}
+\item{psp}{spatstat psp object.}
 
-\item{conn.radius}{segments having ends separated than less then conn.radius will be assumed to belong to the same set}
-
-\item{conn.angle}{maximum angle between segments to belong to the same set}
+\item{conn.radius, conn.angle}{segments will be assigned to belong to the same set if they have endings less than \code{conn.radius} units apart and if the form an angle less than \code{conn.angle}.}
 }
 \description{
 Adds marks to connected segments in a psp
+}
+\examples{
+svgfile = system.file("extdata","SVG.svg", package = "svg2psp") 
+data = svg2psp(svgfile,reverse=T,rescale=T) 
+plot(connectset.psp(data))
 }

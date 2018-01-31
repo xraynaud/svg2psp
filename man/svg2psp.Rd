@@ -4,30 +4,41 @@
 \alias{svg2psp}
 \title{Convert a SVG file to a spatstat psp object.}
 \usage{
-svg2psp(svgfile, owin = NULL, bezier = 0, marks = F, maxlength = NULL,
+svg2psp(svgfile, owin = NULL, bezier = 5, marks = F, maxlength = NULL,
   connect = F, upward = T, rightward = F, conn.radius = NULL,
-  conn.angle = NULL, clip.owin = F, rescale = !is.null(owin))
+  conn.angle = NULL, clip.owin = F, reverse = F, rescale = T)
 }
 \arguments{
 \item{svgfile}{File path of the svg file to convert.}
 
 \item{owin}{Window of the psp.}
 
-\item{bezier}{What to do with Bezier curves. If NULL, bezier curves are converted to bezier polygons (i.e. goes through all control points). If numeric, Bezier curves are converted to linear segments, following the De Casteljau algorithm. \code{bezier}=0 or \code{bezier}=1 draws a straight line from the start of the bezier curve to its end, \code{bezier}=2 draws a straight line from the start to the middle of the curve and then to the end...}
+\item{bezier}{What to do with Bezier curves. If \code{bezier}=0, bezier curves are converted to bezier polygons (i.e. goes through all control points). If \code{bezier}>0, Bezier curves are converted to linear segments, following the De Casteljau algorithm: \code{bezier}=1 draws a straight line from the start of the bezier curve to its end, \code{bezier}=2 draws a straight line from the start to the middle of the curve and then to the end...}
 
 \item{marks}{Add marks to segments:, F/0: no marks, T/1 all segments have a numeric mark (randomly distributed among segments), 2: all segments have a mark depending on their position in the svg file.}
 
-\item{upward}{should all segments points upward.}
+\item{upward}{Should all segments points upward.}
 
-\item{rightward}{should all segments points to the right of the image.}
+\item{rightward}{Should all segments points to the right of the image.}
 
 \item{clip.owin}{Should the returned psp clipped to owin.}
 
-\item{rescale}{Should data recaled to owin size (otherwise expressed in pixels).}
+\item{reverse}{Should the resulting psp object be reversed vertically (i.e. is the origin at the bottom left (default) or the top left?).}
+
+\item{rescale}{Should the psp rescaled to the dimensions given in the svg?}
 }
 \value{
 A psp object
 }
 \description{
 Convert a SVG file to a spatstat psp object.
+}
+\details{
+This functions provide a way to import SVG files in R to use with spatstat. Only absolute and relative SVG paths \code{moveto}, \code{lineto}, and \code{curveto} (quadratic and cubic bezier) are implemented at the moment. 
+There seem to be a wide range of interpretations of the W3C SVG specifications, so import is not completely guaranteed. Package tested with SVG produced by \code{autotrace} (\url{http://autotrace.sourceforge.net/}) and \code{Inkscape} (\url{https://inkscape.org/}, Save as Plain SVG).
+}
+\examples{
+svgfile = system.file("extdata","SVG.svg", package = "svg2psp") #get file path of example data
+data = svg2psp(svgfile,reverse=T,rescale=T) # reverse and rescale are set to true to use the "paper" dimension of the SVG.
+plot(data)
 }
