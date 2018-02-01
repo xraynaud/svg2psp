@@ -4,11 +4,11 @@
 \alias{svg2psp}
 \title{Convert a SVG file to a spatstat psp object.}
 \usage{
-svg2psp(svgfile, bezier = 5, owin = NULL, marks = 0, connect = F,
+svg2psp(file, bezier = 5, owin = NULL, marks = 0, connect = F,
   upward = F, rightward = F, reverse = F, rescale = T, ...)
 }
 \arguments{
-\item{svgfile}{File path of the svg file to convert.}
+\item{file}{File path of the svg file to convert.}
 
 \item{bezier}{Parameters for approximating bezier curves (see Details).}
 

@@ -1,6 +1,6 @@
 #' Convert a SVG file to a spatstat psp object.
 #'
-#' @param svgfile File path of the svg file to convert.
+#' @param file File path of the svg file to convert.
 #' @param bezier Parameters for approximating bezier curves (see Details). 
 #' @param owin Specify a window for the \code{psp}. If \code{NULL}, use details in the SVG file. 
 #' @param marks Add marks to segments (see details).
@@ -32,7 +32,7 @@
 #' data = svg2psp(svgfile,reverse=T,rescale=T) 
 #' plot(data)
 #' @export
-svg2psp = function(svgfile,bezier=5,owin=NULL,marks=0,connect = F, upward=F,rightward=F,reverse=F,rescale=T,...) {
+svg2psp = function(file,bezier=5,owin=NULL,marks=0,connect = F, upward=F,rightward=F,reverse=F,rescale=T,...) {
   
   moreargs = list(...)
 
@@ -41,7 +41,7 @@ svg2psp = function(svgfile,bezier=5,owin=NULL,marks=0,connect = F, upward=F,righ
   svgunits=NULL
   svgowin=NULL
 
-  datasvg = XML::htmlParse(svgfile)
+  datasvg = XML::htmlParse(file)
   #Getting info from svgfile
   svgviewbox = unlist(XML::xpathApply(datasvg, "//svg", XML::xmlGetAttr, "viewbox"))
   svgwidth = XML::xpathApply(datasvg, "//svg", XML::xmlGetAttr, "width")
