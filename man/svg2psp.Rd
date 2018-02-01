@@ -4,41 +4,55 @@
 \alias{svg2psp}
 \title{Convert a SVG file to a spatstat psp object.}
 \usage{
-svg2psp(svgfile, owin = NULL, bezier = 5, marks = F, maxlength = NULL,
-  connect = F, upward = T, rightward = F, conn.radius = NULL,
-  conn.angle = NULL, clip.owin = F, reverse = F, rescale = T)
+svg2psp(svgfile, bezier = 5, owin = NULL, marks = 0, connect = F,
+  upward = F, rightward = F, reverse = F, rescale = T, ...)
 }
 \arguments{
 \item{svgfile}{File path of the svg file to convert.}
 
-\item{owin}{Window of the psp.}
+\item{bezier}{Parameters for approximating bezier curves (see Details).}
 
-\item{bezier}{What to do with Bezier curves. If \code{bezier}=0, bezier curves are converted to bezier polygons (i.e. goes through all control points). If \code{bezier}>0, Bezier curves are converted to linear segments, following the De Casteljau algorithm: \code{bezier}=1 draws a straight line from the start of the bezier curve to its end, \code{bezier}=2 draws a straight line from the start to the middle of the curve and then to the end...}
+\item{owin}{Specify a window for the \code{psp}. If \code{NULL}, use details in the SVG file.}
 
-\item{marks}{Add marks to segments:, F/0: no marks, T/1 all segments have a numeric mark (randomly distributed among segments), 2: all segments have a mark depending on their position in the svg file.}
+\item{marks}{Add marks to segments (see details).}
 
-\item{upward}{Should all segments points upward.}
+\item{connect}{Assign segments to sets depending on their distance and orientation.}
 
-\item{rightward}{Should all segments points to the right of the image.}
+\item{upward, rightward}{directions of the segments (see details).}
 
-\item{clip.owin}{Should the returned psp clipped to owin.}
+\item{reverse}{Define the position of the origin of the \code{psp}.}
 
-\item{reverse}{Should the resulting psp object be reversed vertically (i.e. is the origin at the bottom left (default) or the top left?).}
+\item{rescale}{rescale \code{psp} to the dimensions given in the svg.}
 
-\item{rescale}{Should the psp rescaled to the dimensions given in the svg?}
+\item{...}{Arguments passed to \link{cut.psp} or \link{connectedsets.psp}.}
 }
 \value{
-A psp object
+A (marked) \code{psp} object
 }
 \description{
 Convert a SVG file to a spatstat psp object.
 }
 \details{
 This functions provide a way to import SVG files in R to use with spatstat. Only absolute and relative SVG paths \code{moveto}, \code{lineto}, and \code{curveto} (quadratic and cubic bezier) are implemented at the moment. 
-There seem to be a wide range of interpretations of the W3C SVG specifications, so import is not completely guaranteed. Package tested with SVG produced by \code{autotrace} (\url{http://autotrace.sourceforge.net/}) and \code{Inkscape} (\url{https://inkscape.org/}, Save as Plain SVG).
+There seem to be a wide range of interpretations of the W3C SVG specifications, so import is not completely guaranteed. Package tested with SVG produced by \code{autotrace} (\url{http://autotrace.sourceforge.net/}) and \code{Inkscape} (\url{https://inkscape.org/}, Save as Plain SVG). 
+
+Bezier quadratic and cubic curves are approximated using the De Casteljau algorithm. Quadratic bezier curves are first approximated by a cubic bezier curves. If \code{bezier}=0, bezier curves are converted to bezier polygons (i.e. goes through all control points). If \code{bezier}>0, Bezier curves are approximated by linear segments. The value of the parameter is the number of iterations used in the approximation (see \url{https://en.wikipedia.org/wiki/De_Casteljau's_algorithm} for details).
+
+The resulting \code{psp} can have marks attached. If \code{marks=1}, all segments of the \code{psp} have a numeric mark. If \code{marks=2}, all segments have a mark depending on their position in the svg file. Defaults to \code{marks=0} which results in an unmarked \code{psp}. 
+ 
+If \code{connect=T}, the resulting \code{psp} is processed through \link{connectedsets.psp}. The resulting \code{psp} will be a marked psp with each mark corresponding to a set. 
+
+Parameters \code{upward} and \code{rightward} allow to alter the orientation of segments of the \code{psp}. If both are \code{F}, detected segments have the orientation they have in the SVG file. If \code{upward=T}, the direction of of segments is flipped so that all segments will point towards increasing values of the \emph{y} direction. If \code{rightward=T}, the direction of of segments is flipped so that all segments will point towards increasing values of the \emph{x} direction.
+ 
+The \code{reverse} parameter determines the position of the origin of the \code{psp}. \code{reverse = F} (default) considers the origin at the bottom left of the SVG. \code{reverse=T} puts the origin of the image at the top left, as in SVG files.
+
+Some SVG file contains size information. \code{rescale} determines whether the resulting \code{psp} dimensions are expressed in pixel units (\code{rescale=F}, \emph{default}) or in the units of the SVG file (\code{rescale=T}, if available).
 }
 \examples{
-svgfile = system.file("extdata","SVG.svg", package = "svg2psp") #get file path of example data
-data = svg2psp(svgfile,reverse=T,rescale=T) # reverse and rescale are set to true to use the "paper" dimension of the SVG.
+#get file path of example data
+svgfile = system.file("extdata","SVG.svg", package = "svg2psp") 
+
+# reverse and rescale are set to true to use the "paper" dimension of the SVG.
+data = svg2psp(svgfile,reverse=T,rescale=T) 
 plot(data)
 }
