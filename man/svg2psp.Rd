@@ -5,7 +5,7 @@
 \title{Convert a SVG file to a spatstat psp object.}
 \usage{
 svg2psp(file, bezier = 5, owin = NULL, marks = 0, connect = F,
-  upward = F, rightward = F, reverse = F, rescale = T, ...)
+  upward = F, rightward = F, reverse = T, rescale = T, ...)
 }
 \arguments{
 \item{file}{File path of the svg file to convert.}

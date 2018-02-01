@@ -32,7 +32,7 @@
 #' data = svg2psp(svgfile,reverse=T,rescale=T) 
 #' plot(data)
 #' @export
-svg2psp = function(file,bezier=5,owin=NULL,marks=0,connect = F, upward=F,rightward=F,reverse=F,rescale=T,...) {
+svg2psp = function(file,bezier=5,owin=NULL,marks=0,connect = F, upward=F,rightward=F,reverse=T,rescale=T,...) {
   
   moreargs = list(...)
 
