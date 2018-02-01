@@ -1,0 +1,73 @@
+---
+output: github_document
+---
+
+```{r, echo = FALSE}
+par(mar=c(0,0,0,0))
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "README/README-"
+)
+```
+#svg2psp
+
+The package \code{svg2psp} provides functions to import SVG files into a \code{psp} spatstat R object. 
+
+The main function is `svg2psp` and the only obligatory parameter is the path of the SVG file to import. The function only import SVG _paths_ and understand absolute and relative SVG commands `moveto`, `lineto`, and `curveto` (quadratic and cubic bezier curves). 
+
+```{r usage}
+library(svg2psp)
+filepath = system.file("extdata","SVG.svg", package = "svg2psp")
+svg = svg2psp(file=filepath,bezier = 10)
+svg
+
+```
+
+Imported data can be vizualised using spatstat functions.
+
+```{r plot}
+plot(svg)
+```
+
+Quadratic bezier curves are approximated to cubic bezier curves. Cubic bezier curves are approximated by the De Casteljau algorithm. The number of iterations used for the approximation are passed using the `bezier` parameter. 
+
+```{r lowres}
+svg_low = svg2psp(file=filepath,bezier = 1)
+svg_low
+plot(svg_low)
+```
+
+By default, `svg2psp` assumes that the origin of coordinates is at the bottom left of the image. The parameter `reverse` can be use to flip the vertical coordinate so as to have the origin at the top left of the image, similarly to TIFF images.
+If the SVG contains size information, `svg2psp` also uses these informations to build the psp object (dimensions and units). The `rescale` parameter can be used to obtain a `psp` object in pixel coordinates. 
+
+```{r flip}
+svg2 = svg2psp(file=filepath,bezier = 10,reverse=F, rescale=F)
+svg2
+plot(svg2)
+```
+The other function parameters are detailed in the `help(svg2psp)` help page.
+
+The `svg2psp` package also provides 2 functions to manipulate the psp objects:
+
+The `cut` method cut the segments of the `psp` object to smaller segments of size `maxlength`. Each segments is cut into _n_ smaller segments of length `maxlength` plus a remainding segment of length < `maxlength`. 
+
+```{r cut}
+cut(svg,1) # Note the number of line segments.
+```
+
+The `connectedsets.psp` function automatically define sets of segments based on their proximity and the angles they form. Two segments which have one end less or equal to `conn.radius` units apart and form and angle less or equal to `conn.angle` radian will be considered to belong to the same set. 
+
+```{r connected}
+plot(connectedsets.psp(svg,conn.radius=0,conn.angle=2*pi))
+```
+
+## Installation
+
+You can install svg2psp from github with:
+
+```{r gh-installation, eval = FALSE}
+# install.packages("devtools")
+devtools::install_github("xraynaud/svg2psp")
+```
+
