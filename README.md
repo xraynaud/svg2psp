@@ -6,6 +6,19 @@ svg2psp
 
 The package provides functions to import SVG files into a spatstat R object.
 
+Installation
+------------
+
+You can install svg2psp from github with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("xraynaud/svg2psp")
+```
+
+Usage
+-----
+
 The main function is `svg2psp` and the only obligatory parameter is the path of the SVG file to import. The function only import SVG *paths* and understand absolute and relative SVG commands `moveto`, `lineto`, and `curveto` (quadratic and cubic bezier curves).
 
 ``` r
@@ -47,7 +60,9 @@ svg2
 plot(svg2)
 ```
 
-![](README/README-flip-1.png) The other function parameters are detailed in the `help(svg2psp)` help page.
+![](README/README-flip-1.png)
+
+The other function parameters are detailed in the `help(svg2psp)` help page.
 
 The `svg2psp` package also provides 2 functions to manipulate the psp objects:
 
@@ -66,13 +81,3 @@ plot(connectedsets.psp(svg,conn.radius=0,conn.angle=2*pi))
 ```
 
 ![](README/README-connected-1.png)
-
-Installation
-------------
-
-You can install svg2psp from github with:
-
-``` r
-# install.packages("devtools")
-devtools::install_github("xraynaud/svg2psp")
-```

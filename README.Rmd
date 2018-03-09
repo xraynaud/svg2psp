@@ -17,6 +17,18 @@ knitr::opts_chunk$set(
 
 The package \code{svg2psp} provides functions to import SVG files into a \code{psp} spatstat R object. 
 
+
+## Installation
+
+You can install svg2psp from github with:
+
+```{r gh-installation, eval = FALSE}
+# install.packages("devtools")
+devtools::install_github("xraynaud/svg2psp")
+```
+
+## Usage
+
 The main function is `svg2psp` and the only obligatory parameter is the path of the SVG file to import. The function only import SVG _paths_ and understand absolute and relative SVG commands `moveto`, `lineto`, and `curveto` (quadratic and cubic bezier curves). 
 
 ```{r usage}
@@ -49,6 +61,7 @@ svg2 = svg2psp(file=filepath,bezier = 10,reverse=F, rescale=F)
 svg2
 plot(svg2)
 ```
+
 The other function parameters are detailed in the `help(svg2psp)` help page.
 
 The `svg2psp` package also provides 2 functions to manipulate the psp objects:
@@ -65,12 +78,4 @@ The `connectedsets.psp` function automatically define sets of segments based on 
 plot(connectedsets.psp(svg,conn.radius=0,conn.angle=2*pi))
 ```
 
-## Installation
-
-You can install svg2psp from github with:
-
-```{r gh-installation, eval = FALSE}
-# install.packages("devtools")
-devtools::install_github("xraynaud/svg2psp")
-```
 
