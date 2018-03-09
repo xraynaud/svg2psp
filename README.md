@@ -1,4 +1,6 @@
 
+[![DOI](https://zenodo.org/badge/119565008.svg)](https://zenodo.org/badge/latestdoi/119565008)
+
 svg2psp
 =======
 
