@@ -4,8 +4,9 @@
 \alias{svg2psp}
 \title{Convert a SVG file to a spatstat psp object.}
 \usage{
-svg2psp(file, bezier = 5, owin = NULL, marks = 0, connect = F,
-  upward = F, rightward = F, reverse = T, rescale = T, ...)
+svg2psp(file, bezier = 5, owin = NULL, marks = 0, connect = FALSE,
+  upward = FALSE, rightward = FALSE, reverse = TRUE,
+  rescale = TRUE, ...)
 }
 \arguments{
 \item{file}{File path of the svg file to convert.}
@@ -33,26 +34,26 @@ A (marked) \code{psp} object
 Convert a SVG file to a spatstat psp object.
 }
 \details{
-This functions provide a way to import SVG files in R to use with spatstat. Only absolute and relative SVG paths \code{moveto}, \code{lineto}, and \code{curveto} (quadratic and cubic bezier) are implemented at the moment. 
-There seem to be a wide range of interpretations of the W3C SVG specifications, so import is not completely guaranteed. Package tested with SVG produced by \code{autotrace} (\url{http://autotrace.sourceforge.net/}) and \code{Inkscape} (\url{https://inkscape.org/}, Save as Plain SVG). 
+This functions provide a way to import SVG files in R to use with spatstat. Only absolute and relative SVG paths \code{moveto}, \code{lineto}, and \code{curveto} (quadratic and cubic bezier) are implemented at the moment.
+There seem to be a wide range of interpretations of the W3C SVG specifications, so import is not completely guaranteed. Package tested with SVG produced by \code{autotrace} (\url{http://autotrace.sourceforge.net/}) and \code{Inkscape} (\url{https://inkscape.org/}, Save as Plain SVG).
 
 Bezier quadratic and cubic curves are approximated using the De Casteljau algorithm. Quadratic bezier curves are first approximated by a cubic bezier curves. If \code{bezier}=0, bezier curves are converted to bezier polygons (i.e. goes through all control points). If \code{bezier}>0, Bezier curves are approximated by linear segments. The value of the parameter is the number of iterations used in the approximation (see \url{https://en.wikipedia.org/wiki/De_Casteljau's_algorithm} for details).
 
-The resulting \code{psp} can have marks attached. If \code{marks=1}, all segments of the \code{psp} have a numeric mark. If \code{marks=2}, all segments have a mark depending on their position in the svg file. Defaults to \code{marks=0} which results in an unmarked \code{psp}. 
- 
-If \code{connect=T}, the resulting \code{psp} is processed through \link{connectedsets.psp}. The resulting \code{psp} will be a marked psp with each mark corresponding to a set. 
+The resulting \code{psp} can have marks attached. If \code{marks=1}, all segments of the \code{psp} have a numeric mark. If \code{marks=2}, all segments have a numeric mark depending on their position in the svg file.  Defaults to \code{marks=0} which results in an unmarked \code{psp}.
+
+If \code{connect=T}, the resulting \code{psp} is processed through \link{connectedsets.psp}. The resulting \code{psp} will be a marked psp with each mark corresponding to a set.
 
 Parameters \code{upward} and \code{rightward} allow to alter the orientation of segments of the \code{psp}. If both are \code{F}, detected segments have the orientation they have in the SVG file. If \code{upward=T}, the direction of of segments is flipped so that all segments will point towards increasing values of the \emph{y} direction. If \code{rightward=T}, the direction of of segments is flipped so that all segments will point towards increasing values of the \emph{x} direction.
- 
+
 The \code{reverse} parameter determines the position of the origin of the \code{psp}. \code{reverse = F} (default) considers the origin at the bottom left of the SVG. \code{reverse=T} puts the origin of the image at the top left, as in SVG files.
 
 Some SVG file contains size information. \code{rescale} determines whether the resulting \code{psp} dimensions are expressed in pixel units (\code{rescale=F}, \emph{default}) or in the units of the SVG file (\code{rescale=T}, if available).
 }
 \examples{
 #get file path of example data
-svgfile = system.file("extdata","SVG.svg", package = "svg2psp") 
+svgfile = system.file("extdata","SVG.svg", package = "svg2psp")
 
 # reverse and rescale are set to true to use the "paper" dimension of the SVG.
-data = svg2psp(svgfile,reverse=T,rescale=T) 
+data = svg2psp(svgfile,reverse=TRUE,rescale=TRUE)
 plot(data)
 }

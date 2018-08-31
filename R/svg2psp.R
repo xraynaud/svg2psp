@@ -1,39 +1,39 @@
 #' Convert a SVG file to a spatstat psp object.
 #'
 #' @param file File path of the svg file to convert.
-#' @param bezier Parameters for approximating bezier curves (see Details). 
-#' @param owin Specify a window for the \code{psp}. If \code{NULL}, use details in the SVG file. 
+#' @param bezier Parameters for approximating bezier curves (see Details).
+#' @param owin Specify a window for the \code{psp}. If \code{NULL}, use details in the SVG file.
 #' @param marks Add marks to segments (see details).
-#' @param connect Assign segments to sets depending on their distance and orientation. 
+#' @param connect Assign segments to sets depending on their distance and orientation.
 #' @param upward,rightward directions of the segments (see details).
-#' @param rescale rescale \code{psp} to the dimensions given in the svg. 
-#' @param reverse Define the position of the origin of the \code{psp}. 
+#' @param rescale rescale \code{psp} to the dimensions given in the svg.
+#' @param reverse Define the position of the origin of the \code{psp}.
 #' @param ... Arguments passed to \link{cut.psp} or \link{connectedsets.psp}.
-#' @details This functions provide a way to import SVG files in R to use with spatstat. Only absolute and relative SVG paths \code{moveto}, \code{lineto}, and \code{curveto} (quadratic and cubic bezier) are implemented at the moment. 
-#' There seem to be a wide range of interpretations of the W3C SVG specifications, so import is not completely guaranteed. Package tested with SVG produced by \code{autotrace} (\url{http://autotrace.sourceforge.net/}) and \code{Inkscape} (\url{https://inkscape.org/}, Save as Plain SVG). 
-#' 
+#' @details This functions provide a way to import SVG files in R to use with spatstat. Only absolute and relative SVG paths \code{moveto}, \code{lineto}, and \code{curveto} (quadratic and cubic bezier) are implemented at the moment.
+#' There seem to be a wide range of interpretations of the W3C SVG specifications, so import is not completely guaranteed. Package tested with SVG produced by \code{autotrace} (\url{http://autotrace.sourceforge.net/}) and \code{Inkscape} (\url{https://inkscape.org/}, Save as Plain SVG).
+#'
 #' Bezier quadratic and cubic curves are approximated using the De Casteljau algorithm. Quadratic bezier curves are first approximated by a cubic bezier curves. If \code{bezier}=0, bezier curves are converted to bezier polygons (i.e. goes through all control points). If \code{bezier}>0, Bezier curves are approximated by linear segments. The value of the parameter is the number of iterations used in the approximation (see \url{https://en.wikipedia.org/wiki/De_Casteljau's_algorithm} for details).
-#' 
-#' The resulting \code{psp} can have marks attached. If \code{marks=1}, all segments of the \code{psp} have a numeric mark. If \code{marks=2}, all segments have a mark depending on their position in the svg file. Defaults to \code{marks=0} which results in an unmarked \code{psp}. 
-#'  
-#' If \code{connect=T}, the resulting \code{psp} is processed through \link{connectedsets.psp}. The resulting \code{psp} will be a marked psp with each mark corresponding to a set. 
-#' 
+#'
+#' The resulting \code{psp} can have marks attached. If \code{marks=1}, all segments of the \code{psp} have a numeric mark. If \code{marks=2}, all segments have a numeric mark depending on their position in the svg file.  Defaults to \code{marks=0} which results in an unmarked \code{psp}.
+#'
+#' If \code{connect=T}, the resulting \code{psp} is processed through \link{connectedsets.psp}. The resulting \code{psp} will be a marked psp with each mark corresponding to a set.
+#'
 #' Parameters \code{upward} and \code{rightward} allow to alter the orientation of segments of the \code{psp}. If both are \code{F}, detected segments have the orientation they have in the SVG file. If \code{upward=T}, the direction of of segments is flipped so that all segments will point towards increasing values of the \emph{y} direction. If \code{rightward=T}, the direction of of segments is flipped so that all segments will point towards increasing values of the \emph{x} direction.
-#'  
+#'
 #' The \code{reverse} parameter determines the position of the origin of the \code{psp}. \code{reverse = F} (default) considers the origin at the bottom left of the SVG. \code{reverse=T} puts the origin of the image at the top left, as in SVG files.
-#' 
-#' Some SVG file contains size information. \code{rescale} determines whether the resulting \code{psp} dimensions are expressed in pixel units (\code{rescale=F}, \emph{default}) or in the units of the SVG file (\code{rescale=T}, if available). 
+#'
+#' Some SVG file contains size information. \code{rescale} determines whether the resulting \code{psp} dimensions are expressed in pixel units (\code{rescale=F}, \emph{default}) or in the units of the SVG file (\code{rescale=T}, if available).
 #' @return A (marked) \code{psp} object
 #' @examples
 #' #get file path of example data
-#' svgfile = system.file("extdata","SVG.svg", package = "svg2psp") 
-#' 
+#' svgfile = system.file("extdata","SVG.svg", package = "svg2psp")
+#'
 #' # reverse and rescale are set to true to use the "paper" dimension of the SVG.
-#' data = svg2psp(svgfile,reverse=T,rescale=T) 
+#' data = svg2psp(svgfile,reverse=TRUE,rescale=TRUE)
 #' plot(data)
 #' @export
-svg2psp = function(file,bezier=5,owin=NULL,marks=0,connect = F, upward=F,rightward=F,reverse=T,rescale=T,...) {
-  
+svg2psp = function(file,bezier=5,owin=NULL, marks=0, connect = FALSE, upward=FALSE,rightward=FALSE,reverse=TRUE,rescale=TRUE,...) {
+
   moreargs = list(...)
 
   svgtranslate = c(0,0)
@@ -49,7 +49,7 @@ svg2psp = function(file,bezier=5,owin=NULL,marks=0,connect = F, upward=F,rightwa
   svgunits = gsub("[0-9 \\.]","",svgwidth)
   svgwidth=as.numeric(gsub("[a-zA-Z]","",svgwidth))
   svgheight=as.numeric(gsub("[a-zA-Z]","",svgheight))
-  
+
   if (!is.null(svgviewbox)) {
     svgviewbox = as.numeric(unlist(strsplit(svgviewbox," ")))
     svgscale = c(svgwidth/diff(svgviewbox[c(1,3)]),svgheight/diff(svgviewbox[c(2,4)]))
@@ -187,17 +187,17 @@ svg2psp = function(file,bezier=5,owin=NULL,marks=0,connect = F, upward=F,rightwa
                    b30 = as.numeric(p[3:4])
                    b10 = b00 + 2/3*(as.numeric(p[1:2])-b00)
                    b20 = b30 + 2/3*(as.numeric(p[1:2])-b30)
-                   
+
                    for (t in breaks) {
                      oldpos = pos
                      b01 = (1-t)*b00 + t*b10
                      b11 = (1-t)*b10 + t*b20
                      b21 = (1-t)*b20 + t*b30
-                   
+
                      b02 = (1-t)*b01 + t*b11
                      b12 = (1-t)*b11 + t*b21
                      pos = (1-t)*b02 + t*b12
-                     
+
                      datapoints[cp,] = c(oldpos,pos,m)
                      cp = cp+1
                      if (marks == 2) {
@@ -245,24 +245,24 @@ svg2psp = function(file,bezier=5,owin=NULL,marks=0,connect = F, upward=F,rightwa
                  oldpos = b20
                } else {
                  if (bezier>1) {
-                   
+
                    breaks = ((1:bezier)/bezier)[-bezier]
-                   
+
                    b00 = oldpos
                    b30 = pos + as.numeric(p[3:4])
                    b10 = b00 + 2/3*(as.numeric(p[1:2])-b00)
                    b20 = b30 + 2/3*(as.numeric(p[1:2])-b30)
-                   
+
                    for (t in breaks) {
                      oldpos = pos
                      b01 = (1-t)*b00 + t*b10
                      b11 = (1-t)*b10 + t*b20
                      b21 = (1-t)*b20 + t*b30
-                     
+
                      b02 = (1-t)*b01 + t*b11
                      b12 = (1-t)*b11 + t*b21
                      pos = (1-t)*b02 + t*b12
-                     
+
                      datapoints[cp,] = c(oldpos,pos,m)
                      cp = cp+1
                      if (marks == 2) {
@@ -311,24 +311,24 @@ svg2psp = function(file,bezier=5,owin=NULL,marks=0,connect = F, upward=F,rightwa
                  oldpos = b20
                } else {
                  if (bezier>1) {
-                   
+
                    breaks = ((1:bezier)/bezier)[-bezier]
-                   
+
                    b00 = oldpos
                    b10 = pos + as.numeric(p[1:2])
                    b20 = pos + as.numeric(p[3:4])
                    b30 = pos + as.numeric(p[5:6])
-                   
+
                    for (t in breaks) {
                      oldpos = pos
                      b01 = (1-t)*b00 + t*b10
                      b11 = (1-t)*b10 + t*b20
                      b21 = (1-t)*b20 + t*b30
-                     
+
                      b02 = (1-t)*b01 + t*b11
                      b12 = (1-t)*b11 + t*b21
                      pos = (1-t)*b02 + t*b12
-                     
+
                      datapoints[cp,] = c(oldpos,pos,m)
                      cp = cp+1
                      if (marks == 2) {
@@ -382,17 +382,17 @@ svg2psp = function(file,bezier=5,owin=NULL,marks=0,connect = F, upward=F,rightwa
                    b10 = as.numeric(p[1:2])
                    b20 = as.numeric(p[3:4])
                    b30 = as.numeric(p[5:6])
-                   
+
                    for (t in breaks) {
                      oldpos = pos
                      b01 = (1-t)*b00 + t*b10
                      b11 = (1-t)*b10 + t*b20
                      b21 = (1-t)*b20 + t*b30
-                     
+
                      b02 = (1-t)*b01 + t*b11
                      b12 = (1-t)*b11 + t*b21
                      pos = (1-t)*b02 + t*b12
-                     
+
                      datapoints[cp,] = c(oldpos,pos,m)
                      cp = cp+1
                      if (marks == 2) {
@@ -441,10 +441,10 @@ svg2psp = function(file,bezier=5,owin=NULL,marks=0,connect = F, upward=F,rightwa
       datapsp = spatstat::superimpose(datapsp,spatstat::as.psp(lpath[[i]],window=svgowin,check=F))
     }
   }
-  # Datapsp contains the data. 
-  
+  # Datapsp contains the data.
+
   if (!is.null(moreargs$maxlength)) {
-    datapsp = cut.psp(datapsp,maxlength)
+    datapsp = cut.psp(datapsp,moreargs$maxlength)
   }
 
   # changing orientation of segments of cell borders to point upwards

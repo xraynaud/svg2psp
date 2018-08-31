@@ -4,12 +4,14 @@
 \alias{cut.psp}
 \title{Cut a psp segments into smaller segments.}
 \usage{
-\method{cut}{psp}(datapsp, maxlength)
+\method{cut}{psp}(x, maxlength, ...)
 }
 \arguments{
-\item{datapsp}{PSP object to be cut}
+\item{x}{PSP object to be cut}
 
 \item{maxlength}{Maximum length of segments in the returned psp object}
+
+\item{...}{Ignored}
 }
 \value{
 Returns a new psp object with segments length of \code{maxlength} a max.
@@ -18,7 +20,7 @@ Returns a new psp object with segments length of \code{maxlength} a max.
 Cut a psp segments into smaller segments.
 }
 \examples{
-svgfile = system.file("extdata","SVG.svg", package = "svg2psp") 
-data = svg2psp(svgfile,reverse=T,rescale=T) # 217 segments
+svgfile = system.file("extdata","SVG.svg", package = "svg2psp")
+data = svg2psp(svgfile,reverse=TRUE,rescale=TRUE) # 217 segments
 cutdata = cut(data,1) # 679 segments
 }

@@ -1,11 +1,11 @@
 #' Adds marks to connected segments in a psp
-#' 
+#'
 #' @param psp spatstat \code{psp} object.
-#' @param conn.radius,conn.angle segments will be assigned to belong to the same set if they have endings less than \code{conn.radius} units apart and if the form an angle less than \code{conn.angle}. 
+#' @param conn.radius,conn.angle segments will be assigned to belong to the same set if they have endings less than \code{conn.radius} units apart and if the form an angle less than \code{conn.angle}.
 #' @examples
-#' svgfile = system.file("extdata","SVG.svg", package = "svg2psp") 
-#' data = svg2psp(svgfile,reverse=T,rescale=T) 
-#' plot(connectset.psp(data))
+#' svgfile = system.file("extdata","SVG.svg", package = "svg2psp")
+#' data = svg2psp(svgfile,reverse=TRUE,rescale=TRUE)
+#' plot(connectedsets.psp(data))
 #' @export
 connectedsets.psp = function(psp,conn.radius=0,conn.angle=2*pi) {
   addmarks=F

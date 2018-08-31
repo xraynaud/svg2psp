@@ -1,14 +1,19 @@
 #' 	Cut a psp segments into smaller segments.
 #'
-#' @param datapsp PSP object to be cut
+#' @param x PSP object to be cut
 #' @param maxlength Maximum length of segments in the returned psp object
+#' @param ... Ignored
 #' @return Returns a new psp object with segments length of \code{maxlength} a max.
 #' @examples
-#' svgfile = system.file("extdata","SVG.svg", package = "svg2psp") 
-#' data = svg2psp(svgfile,reverse=T,rescale=T) # 217 segments
+#' svgfile = system.file("extdata","SVG.svg", package = "svg2psp")
+#' data = svg2psp(svgfile,reverse=TRUE,rescale=TRUE) # 217 segments
 #' cutdata = cut(data,1) # 679 segments
 #' @export
-cut.psp = function(datapsp,maxlength) {
+cut.psp = function(x,maxlength,...) {
+
+  if (!inherits(x, "psp"))
+    stop("'x' must be a psp object")
+  datapsp <- spatstat::as.psp(x)
 
   pts = data.frame(x0 = NA, y0 = NA,x1 = NA,y1 = NA,mark=NA)
   n = 1
