@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
 
 [![DOI](https://zenodo.org/badge/119565008.svg)](https://zenodo.org/badge/latestdoi/119565008)
 
-#svg2psp
+# svg2psp
 
 The package \code{svg2psp} provides functions to import SVG files into a \code{psp} spatstat R object. 
 
@@ -29,7 +29,7 @@ devtools::install_github("xraynaud/svg2psp")
 
 ## Usage
 
-The main function is `svg2psp` and the only obligatory parameter is the path of the SVG file to import. The function only import SVG _paths_ and understand absolute and relative SVG commands `moveto`, `lineto`, and `curveto` (quadratic and cubic bezier curves). 
+The main function is `svg2psp` and the only obligatory parameter is the path of the SVG file to import. The function only import SVG _paths_ and understand absolute and relative SVG commands `moveto`, `lineto`, and `curveto` (quadratic and cubic bezier curves) as well as `lineto` shorthands `horizontal` and `vertical`.
 
 ```{r usage}
 library(svg2psp)
