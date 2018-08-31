@@ -10,6 +10,9 @@ knitr::opts_chunk$set(
   fig.path = "README/README-"
 )
 ```
+
+[![DOI](https://zenodo.org/badge/119565008.svg)](https://zenodo.org/badge/latestdoi/119565008)
+
 #svg2psp
 
 The package \code{svg2psp} provides functions to import SVG files into a \code{psp} spatstat R object. 
