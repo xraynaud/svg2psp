@@ -4,9 +4,9 @@
 \alias{svg2psp}
 \title{Convert a SVG file to a spatstat psp object.}
 \usage{
-svg2psp(file, bezier = 5, owin = NULL, marks = 0, connect = FALSE,
-  upward = FALSE, rightward = FALSE, reverse = TRUE,
-  rescale = TRUE, ...)
+svg2psp(file, bezier = 5, owin = NULL, marks = 0, svgmarks = TRUE,
+  connect = FALSE, upward = FALSE, rightward = FALSE,
+  reverse = TRUE, rescale = TRUE, ...)
 }
 \arguments{
 \item{file}{File path of the svg file to convert.}
@@ -16,6 +16,8 @@ svg2psp(file, bezier = 5, owin = NULL, marks = 0, connect = FALSE,
 \item{owin}{Specify a window for the \code{psp}. If \code{NULL}, use details in the SVG file.}
 
 \item{marks}{Add marks to segments (see details).}
+
+\item{svgmarks}{Use SVG segment id as mark.}
 
 \item{connect}{Assign segments to sets depending on their distance and orientation.}
 
@@ -39,7 +41,7 @@ There seem to be a wide range of interpretations of the W3C SVG specifications, 
 
 Bezier quadratic and cubic curves are approximated using the De Casteljau algorithm. Quadratic bezier curves are first approximated by a cubic bezier curves. If \code{bezier}=0, bezier curves are converted to bezier polygons (i.e. goes through all control points). If \code{bezier}>0, Bezier curves are approximated by linear segments. The value of the parameter is the number of iterations used in the approximation (see \url{https://en.wikipedia.org/wiki/De_Casteljau's_algorithm} for details).
 
-The resulting \code{psp} can have marks attached. If \code{marks=1}, all segments of the \code{psp} have a numeric mark. If \code{marks=2}, all segments have a numeric mark depending on their position in the svg file.  Defaults to \code{marks=0} which results in an unmarked \code{psp}.
+The resulting \code{psp} can have marks attached. If \code{marks=1} and  \code{svgmark=F}, segments of the \code{psp} have a numeric mark depending on the SGV path they belong to. If \code{marks=1} and  \code{svgmark=T}, segments have the SVG path \code{id} as mark. If \code{marks=2}, all segments have a numeric mark depending on the SVG command that created them. If \code{marks=3}, all segments have a unique mark (for debug purposes). Defaults to \code{marks=0} which results in an unmarked \code{psp}.
 
 If \code{connect=T}, the resulting \code{psp} is processed through \link{connectedsets.psp}. The resulting \code{psp} will be a marked psp with each mark corresponding to a set.
 

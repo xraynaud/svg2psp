@@ -4,6 +4,7 @@
 #' @param bezier Parameters for approximating bezier curves (see Details).
 #' @param owin Specify a window for the \code{psp}. If \code{NULL}, use details in the SVG file.
 #' @param marks Add marks to segments (see details).
+#' @param svgmarks Use SVG segment id as mark.
 #' @param connect Assign segments to sets depending on their distance and orientation.
 #' @param upward,rightward directions of the segments (see details).
 #' @param rescale rescale \code{psp} to the dimensions given in the svg.
@@ -14,7 +15,7 @@
 #'
 #' Bezier quadratic and cubic curves are approximated using the De Casteljau algorithm. Quadratic bezier curves are first approximated by a cubic bezier curves. If \code{bezier}=0, bezier curves are converted to bezier polygons (i.e. goes through all control points). If \code{bezier}>0, Bezier curves are approximated by linear segments. The value of the parameter is the number of iterations used in the approximation (see \url{https://en.wikipedia.org/wiki/De_Casteljau's_algorithm} for details).
 #'
-#' The resulting \code{psp} can have marks attached. If \code{marks=1}, all segments of the \code{psp} have a numeric mark. If \code{marks=2}, all segments have a numeric mark depending on their position in the svg file.  Defaults to \code{marks=0} which results in an unmarked \code{psp}.
+#' The resulting \code{psp} can have marks attached. If \code{marks=1} and  \code{svgmark=F}, segments of the \code{psp} have a numeric mark depending on the SGV path they belong to. If \code{marks=1} and  \code{svgmark=T}, segments have the SVG path \code{id} as mark. If \code{marks=2}, all segments have a numeric mark depending on the SVG command that created them. If \code{marks=3}, all segments have a unique mark (for debug purposes). Defaults to \code{marks=0} which results in an unmarked \code{psp}.
 #'
 #' If \code{connect=T}, the resulting \code{psp} is processed through \link{connectedsets.psp}. The resulting \code{psp} will be a marked psp with each mark corresponding to a set.
 #'
@@ -32,7 +33,7 @@
 #' data = svg2psp(svgfile,reverse=TRUE,rescale=TRUE)
 #' plot(data)
 #' @export
-svg2psp = function(file,bezier=5,owin=NULL, marks=0, connect = FALSE, upward=FALSE,rightward=FALSE,reverse=TRUE,rescale=TRUE,...) {
+svg2psp = function(file,bezier=5,owin=NULL, marks=0, svgmarks=TRUE, connect = FALSE, upward=FALSE,rightward=FALSE,reverse=TRUE,rescale=TRUE,...) {
 
   moreargs = list(...)
 
@@ -75,9 +76,16 @@ svg2psp = function(file,bezier=5,owin=NULL, marks=0, connect = FALSE, upward=FAL
   }
 #operating on paths
   lpath = list()
+  segment_marks = unlist(XML::xpathApply(datasvg, "//path", XML::xmlGetAttr, "id")) ## get path id for (marks == 1 & svgmarks = T)
   paths = XML::xpathApply(datasvg, "//path", XML::xmlGetAttr, "d")
   paths = gsub("([a-zA-Z])", " \\1 \\2", paths)
-
+  if (svgmarks & length(segment_marks) != length(paths)) {
+    segment_marks = 1:length(segment_marks)
+    warning("Number of segment id is different then number of paths in SVG file. Falling back to numbered marks")
+  }
+  if (!svgmarks & marks == 1) {
+    segment_marks = 1:length(segment_marks)
+  }
   for (i in 1:length(paths)) {
     pos = c(0,0)
     p =  unlist(strsplit(unlist(strsplit(paths[[i]],"[, ]+")),"\n",fixed=T))
@@ -125,14 +133,15 @@ svg2psp = function(file,bezier=5,owin=NULL, marks=0, connect = FALSE, upward=FAL
              "l" = {
                lgt = 2
                cp = cp +1
-               if (marks == 1) {
-                 m = m+1
-               } else {
-                 m = cp
-               }
+               m = switch(marks+1,
+                          NA,
+                      segment_marks[i],
+                      m+1,
+                      cp
+                      )
                oldpos = pos
                pos = pos+as.numeric(p[1:lgt])
-               datapoints[cp,] = c(oldpos,pos,m)
+               datapoints[cp,] = list(oldpos[1],oldpos[2],pos[1],pos[2],m)
                if (length(p)> lgt) {
                  p = p[(lgt+1):length(p)]
                } else {
@@ -142,14 +151,15 @@ svg2psp = function(file,bezier=5,owin=NULL, marks=0, connect = FALSE, upward=FAL
              "L" = {
                lgt = 2
                cp = cp +1
-               if (marks == 1) {
-                 m = m+1
-               } else {
-                 m = cp
-               }
+               m = switch(marks+1,
+                          NA,
+                            segment_marks[i],
+                            m+1,
+                            cp
+               )
                oldpos = pos
                pos = as.numeric(p[1:lgt])
-               datapoints[cp,] = c(oldpos,pos,m)
+               datapoints[cp,] = list(oldpos[1],oldpos[2],pos[1],pos[2],m)
                if (length(p)> lgt) {
                  p = p[(lgt+1):length(p)]
                } else {
@@ -160,14 +170,15 @@ svg2psp = function(file,bezier=5,owin=NULL, marks=0, connect = FALSE, upward=FAL
             "v" = {
               lgt = 1
               cp = cp +1
-              if (marks == 1) {
-                m = m+1
-              } else {
-                m = cp
-              }
+              m = switch(marks+1,
+                         NA,
+                         segment_marks[i],
+                         m+1,
+                         cp
+              )
               oldpos = pos
               pos = pos+c(0,as.numeric(p[1:lgt]))
-              datapoints[cp,] = c(oldpos,pos,m)
+              datapoints[cp,] = list(oldpos[1],oldpos[2],pos[1],pos[2],m)
               if (length(p)> lgt) {
                 p = p[(lgt+1):length(p)]
               } else {
@@ -177,14 +188,15 @@ svg2psp = function(file,bezier=5,owin=NULL, marks=0, connect = FALSE, upward=FAL
             "V" = {
               lgt = 1
               cp = cp +1
-              if (marks == 1) {
-                m = m+1
-              } else {
-                m = cp
-              }
+              m = switch(marks+1,
+                         NA,
+                         segment_marks[i],
+                         m+1,
+                         cp
+              )
               oldpos = pos
               pos = c(pos[1],as.numeric(p[1:lgt]))
-              datapoints[cp,] = c(oldpos,pos,m)
+              datapoints[cp,] = list(oldpos[1],oldpos[2],pos[1],pos[2],m)
               if (length(p)> lgt) {
                 p = p[(lgt+1):length(p)]
               } else {
@@ -195,14 +207,15 @@ svg2psp = function(file,bezier=5,owin=NULL, marks=0, connect = FALSE, upward=FAL
             "h" = {
               lgt = 1
               cp = cp +1
-              if (marks == 1) {
-                m = m+1
-              } else {
-                m = cp
-              }
+              m = switch(marks+1,
+                         NA,
+                         segment_marks[i],
+                         m+1,
+                         cp
+              )
               oldpos = pos
               pos = pos+c(as.numeric(p[1:lgt]),0)
-              datapoints[cp,] = c(oldpos,pos,m)
+              datapoints[cp,] = list(oldpos[1],oldpos[2],pos[1],pos[2],m)
               if (length(p)> lgt) {
                 p = p[(lgt+1):length(p)]
               } else {
@@ -212,14 +225,15 @@ svg2psp = function(file,bezier=5,owin=NULL, marks=0, connect = FALSE, upward=FAL
             "H" = {
               lgt = 1
               cp = cp +1
-              if (marks == 1) {
-                m = m+1
-              } else {
-                m = cp
-              }
+              m = switch(marks+1,
+                         NA,
+                         segment_marks[i],
+                         m+1,
+                         cp
+              )
               oldpos = pos
               pos = c(as.numeric(p[1:lgt]),pos[2])
-              datapoints[cp,] = c(oldpos,pos,m)
+              datapoints[cp,] = list(oldpos[1],oldpos[2],pos[1],pos[2],m)
               if (length(p)> lgt) {
                 p = p[(lgt+1):length(p)]
               } else {
@@ -230,23 +244,24 @@ svg2psp = function(file,bezier=5,owin=NULL, marks=0, connect = FALSE, upward=FAL
              "Q" = {
                lgt = 4
                cp = cp +1
-               if (marks == 1) {
-                 m = m+1
-               } else {
-                 m = cp
-               }
+               m = switch(marks+1,
+                          NA,
+                          segment_marks[i],
+                          m+1,
+                          cp
+               )
                oldpos = pos
                if (bezier==0) {
                  b10 = pos + as.numeric(p[1:2])
-                 datapoints[cp,] = c(oldpos,b10,m)
+                 datapoints[cp,] = list(oldpos[1],oldpos[2],b10[1],b10[2],m)
                  cp = cp+1
-                 if (marks == 2) {
+                 if (marks == 3) {
                    m = cp
                  }
                  b20 = pos + as.numeric(p[3:4])
-                 datapoints[cp,] = c(b10,b20,m)
+                 datapoints[cp,] = list(b10[1],b10[2],b20[1],b20[2],m)
                  cp=cp+1
-                 if (marks == 2) {
+                 if (marks == 3) {
                    m = cp
                  }
                  oldpos = b20
@@ -268,9 +283,9 @@ svg2psp = function(file,bezier=5,owin=NULL, marks=0, connect = FALSE, upward=FAL
                      b12 = (1-t)*b11 + t*b21
                      pos = (1-t)*b02 + t*b12
 
-                     datapoints[cp,] = c(oldpos,pos,m)
+                     datapoints[cp,] = list(oldpos[1],oldpos[2],pos[1],pos[2],m)
                      cp = cp+1
-                     if (marks == 2) {
+                     if (marks == 3) {
                        m = cp
                      }
                    }
@@ -283,7 +298,7 @@ svg2psp = function(file,bezier=5,owin=NULL, marks=0, connect = FALSE, upward=FAL
                } else {
                  pos = b30
                }
-               datapoints[cp,] = c(oldpos,pos,m)
+               datapoints[cp,] = list(oldpos[1],oldpos[2],pos[1],pos[2],m)
                if (length(p)> lgt) {
                  p = p[(lgt+1):length(p)]
                } else {
@@ -293,23 +308,24 @@ svg2psp = function(file,bezier=5,owin=NULL, marks=0, connect = FALSE, upward=FAL
              "q" = {
                lgt = 4
                cp = cp +1
-               if (marks == 1) {
-                 m = m+1
-               } else {
-                 m = cp
-               }
+               m = switch(marks+1,
+                          NA,
+                          segment_marks[i],
+                          m+1,
+                          cp
+               )
                oldpos = pos
                if (bezier==0) {
                  b10 = pos + as.numeric(p[1:2])
-                 datapoints[cp,] = c(oldpos,b10,m)
+                 datapoints[cp,] = list(oldpos[1],oldpos[2],b10[1],b10[2],m)
                  cp = cp+1
-                 if (marks == 2) {
+                 if (marks == 3) {
                    m = cp
                  }
                  b20 = pos + as.numeric(p[3:4])
-                 datapoints[cp,] = c(b10,b20,m)
+                 datapoints[cp,] = list(b10[1],b10[2],b20[1],b20[2],m)
                  cp=cp+1
-                 if (marks == 2) {
+                 if (marks == 3) {
                    m = cp
                  }
                  oldpos = b20
@@ -333,9 +349,9 @@ svg2psp = function(file,bezier=5,owin=NULL, marks=0, connect = FALSE, upward=FAL
                      b12 = (1-t)*b11 + t*b21
                      pos = (1-t)*b02 + t*b12
 
-                     datapoints[cp,] = c(oldpos,pos,m)
+                     datapoints[cp,] = list(oldpos[1],oldpos[2],pos[1],pos[2],m)
                      cp = cp+1
-                     if (marks == 2) {
+                     if (marks == 3) {
                        m = cp
                      }
                    }
@@ -348,7 +364,7 @@ svg2psp = function(file,bezier=5,owin=NULL, marks=0, connect = FALSE, upward=FAL
                } else {
                  pos = b30
                }
-               datapoints[cp,] = c(oldpos,pos,m)
+               datapoints[cp,] = list(oldpos[1],oldpos[2],pos[1],pos[2],m)
                if (length(p)> lgt) {
                  p = p[(lgt+1):length(p)]
                } else {
@@ -359,23 +375,24 @@ svg2psp = function(file,bezier=5,owin=NULL, marks=0, connect = FALSE, upward=FAL
              "c" = {
                lgt = 6
                cp = cp +1
-               if (marks == 1) {
-                 m = m+1
-               } else {
-                 m = cp
-               }
+               m = switch(marks+1,
+                          NA,
+                          segment_marks[i],
+                          m+1,
+                          cp
+               )
                oldpos = pos
                if (bezier==0) {
                  b10 = pos + as.numeric(p[1:2])
-                 datapoints[cp,] = c(oldpos,b10,m)
+                 datapoints[cp,] = list(oldpos[1],oldpos[2],b10[1],b10[2],m)
                  cp = cp+1
-                 if (marks == 2) {
+                 if (marks == 3) {
                    m = cp
                  }
                  b20 = pos + as.numeric(p[3:4])
-                 datapoints[cp,] = c(b10,b20,m)
+                 datapoints[cp,] = list(b10[1],b10[2],b20[1],b20[2],m)
                  cp=cp+1
-                 if (marks == 2) {
+                 if (marks == 3) {
                    m = cp
                  }
                  oldpos = b20
@@ -399,9 +416,9 @@ svg2psp = function(file,bezier=5,owin=NULL, marks=0, connect = FALSE, upward=FAL
                      b12 = (1-t)*b11 + t*b21
                      pos = (1-t)*b02 + t*b12
 
-                     datapoints[cp,] = c(oldpos,pos,m)
+                     datapoints[cp,] = list(oldpos[1],oldpos[2],pos[1],pos[2],m)
                      cp = cp+1
-                     if (marks == 2) {
+                     if (marks == 3) {
                        m = cp
                      }
                    }
@@ -414,7 +431,7 @@ svg2psp = function(file,bezier=5,owin=NULL, marks=0, connect = FALSE, upward=FAL
                } else {
                  pos = b30
                }
-               datapoints[cp,] = c(oldpos,pos,m)
+               datapoints[cp,] = list(oldpos[1],oldpos[2],pos[1],pos[2],m)
                if (length(p)> lgt) {
                  p = p[(lgt+1):length(p)]
                } else {
@@ -424,24 +441,25 @@ svg2psp = function(file,bezier=5,owin=NULL, marks=0, connect = FALSE, upward=FAL
              "C" = {
                lgt = 6
                cp = cp +1
-               if (marks == 1) {
-                 m = m+1
-               } else {
-                 m = cp
-               }
+               m = switch(marks+1,
+                          NA,
+                          segment_marks[i],
+                          m+1,
+                          cp
+               )
                oldpos = pos
                if (bezier==0) {
                  pos = as.numeric(p[1:2])
-                 datapoints[cp,] = c(oldpos,pos,m)
+                 datapoints[cp,] = list(oldpos[1],oldpos[2],pos[1],pos[2],m)
                  cp = cp+1
-                 if (marks == 2) {
+                 if (marks == 3) {
                    m = cp
                  }
                  oldpos = pos
                  pos = as.numeric(p[3:4])
-                 datapoints[cp,] = c(oldpos,pos,m)
+                 datapoints[cp,] = list(oldpos[1],oldpos[2],pos[1],pos[2],m)
                  cp=cp+1
-                 if (marks == 2) {
+                 if (marks == 3) {
                    m = cp
                  }
                  oldpos = pos
@@ -463,9 +481,9 @@ svg2psp = function(file,bezier=5,owin=NULL, marks=0, connect = FALSE, upward=FAL
                      b12 = (1-t)*b11 + t*b21
                      pos = (1-t)*b02 + t*b12
 
-                     datapoints[cp,] = c(oldpos,pos,m)
+                     datapoints[cp,] = list(oldpos[1],oldpos[2],pos[1],pos[2],m)
                      cp = cp+1
-                     if (marks == 2) {
+                     if (marks == 3) {
                        m = cp
                      }
                    }
@@ -473,7 +491,7 @@ svg2psp = function(file,bezier=5,owin=NULL, marks=0, connect = FALSE, upward=FAL
                  }
                }
                pos = as.numeric(p[(lgt-1):lgt])
-               datapoints[cp,] = c(oldpos,pos,m)
+               datapoints[cp,] = list(oldpos[1],oldpos[2],pos[1],pos[2],m)
                if (length(p)> lgt) {
                  p = p[(lgt+1):length(p)]
                } else {
@@ -490,19 +508,17 @@ svg2psp = function(file,bezier=5,owin=NULL, marks=0, connect = FALSE, upward=FAL
             stop(paste("Unrecognized character in SVG path:", let))
       )
       if (closure) {
-        datapoints[cp+1,] = c(pos,datapoints[1,1:2])
+        datapoints[cp+1,] = list(pos[1],pos[2],datapoints[1,1],datapoints[1,2],m)
       }
     }
     datapoints[,1] = svgtranslate[1] + datapoints[,1]
     datapoints[,2] = svgtranslate[2] + datapoints[,2]
     datapoints[,3] = svgtranslate[1] + datapoints[,3]
     datapoints[,4] = svgtranslate[2] + datapoints[,4]
-    if (marks == 1) {
-      datapoints$marks = rep(i,dim(datapoints)[1])
-    }
+
     lpath[[i]] =datapoints
   }
-  # all points to produce the psp are now in datapoints
+  # all points to produce the psp are now in lpath
   if (is.null(svgowin)) {
     svgowin = spatstat::owin(c(0,svgwidth),c(0,svgheight),unitname=svgunits)
   }
@@ -536,12 +552,12 @@ svg2psp = function(file,bezier=5,owin=NULL, marks=0, connect = FALSE, upward=FAL
                              marks =datapsp[datapsp$ends$x1<datapsp$ends$x0]$marks,
                              window=spatstat::as.owin(datapsp)))
   }
-  if (!marks) {
+  if (marks==0) {
     datapsp=spatstat::unmark(datapsp)
   }
-  if (marks==1) {
-    spatstat::marks(datapsp) = sample(1:datapsp$n)
-  }
+# if (marks==3) {
+#    spatstat::marks(datapsp) = sample(1:datapsp$n)
+#  }
   if (connect) {
     default.args = formals(connectedsets.psp)
     conn.radius = ifelse(is.null(moreargs$conn.radius),default.args$conn.radius,moreargs$conn.radius)
