@@ -131,7 +131,7 @@ svg2psp = function(file,bezier=5,owin=NULL, marks=0, connect = FALSE, upward=FAL
                  m = cp
                }
                oldpos = pos
-               pos = pos+as.numeric(p[1:2])
+               pos = pos+as.numeric(p[1:lgt])
                datapoints[cp,] = c(oldpos,pos,m)
                if (length(p)> lgt) {
                  p = p[(lgt+1):length(p)]
@@ -148,7 +148,7 @@ svg2psp = function(file,bezier=5,owin=NULL, marks=0, connect = FALSE, upward=FAL
                  m = cp
                }
                oldpos = pos
-               pos = as.numeric(p[1:2])
+               pos = as.numeric(p[1:lgt])
                datapoints[cp,] = c(oldpos,pos,m)
                if (length(p)> lgt) {
                  p = p[(lgt+1):length(p)]
@@ -156,6 +156,76 @@ svg2psp = function(file,bezier=5,owin=NULL, marks=0, connect = FALSE, upward=FAL
                  p=c()
                }
              },
+            # Dealing with vertical lines lineto (v/V)
+            "v" = {
+              lgt = 1
+              cp = cp +1
+              if (marks == 1) {
+                m = m+1
+              } else {
+                m = cp
+              }
+              oldpos = pos
+              pos = pos+c(0,as.numeric(p[1:lgt]))
+              datapoints[cp,] = c(oldpos,pos,m)
+              if (length(p)> lgt) {
+                p = p[(lgt+1):length(p)]
+              } else {
+                p=c()
+              }
+            },
+            "V" = {
+              lgt = 1
+              cp = cp +1
+              if (marks == 1) {
+                m = m+1
+              } else {
+                m = cp
+              }
+              oldpos = pos
+              pos = c(pos[1],as.numeric(p[1:lgt]))
+              datapoints[cp,] = c(oldpos,pos,m)
+              if (length(p)> lgt) {
+                p = p[(lgt+1):length(p)]
+              } else {
+                p=c()
+              }
+            },
+            # Dealing with horizontal lines lineto (h/H)
+            "h" = {
+              lgt = 1
+              cp = cp +1
+              if (marks == 1) {
+                m = m+1
+              } else {
+                m = cp
+              }
+              oldpos = pos
+              pos = pos+c(as.numeric(p[1:lgt]),0)
+              datapoints[cp,] = c(oldpos,pos,m)
+              if (length(p)> lgt) {
+                p = p[(lgt+1):length(p)]
+              } else {
+                p=c()
+              }
+            },
+            "H" = {
+              lgt = 1
+              cp = cp +1
+              if (marks == 1) {
+                m = m+1
+              } else {
+                m = cp
+              }
+              oldpos = pos
+              pos = c(as.numeric(p[1:lgt]),pos[2])
+              datapoints[cp,] = c(oldpos,pos,m)
+              if (length(p)> lgt) {
+                p = p[(lgt+1):length(p)]
+              } else {
+                p=c()
+              }
+            },
              # Dealing with quadratic bezier curves (Q/q)
              "Q" = {
                lgt = 4
@@ -416,7 +486,8 @@ svg2psp = function(file,bezier=5,owin=NULL, marks=0, connect = FALSE, upward=FAL
              },
              "Z" = {
                closure=T
-             }
+             },
+            stop(paste("Unrecognized character in SVG path:", let))
       )
       if (closure) {
         datapoints[cp+1,] = c(pos,datapoints[1,1:2])
@@ -442,10 +513,7 @@ svg2psp = function(file,bezier=5,owin=NULL, marks=0, connect = FALSE, upward=FAL
     }
   }
   # Datapsp contains the data.
-
-  if (!is.null(moreargs$maxlength)) {
-    datapsp = cut.psp(datapsp,moreargs$maxlength)
-  }
+  datapsp= datapsp[which(spatstat::lengths.psp(datapsp)>0)]
 
   # changing orientation of segments of cell borders to point upwards
   if(upward) {
@@ -491,7 +559,10 @@ svg2psp = function(file,bezier=5,owin=NULL, marks=0, connect = FALSE, upward=FAL
     datapsp = datapsp[owin]
   }
 
-  datapsp= datapsp[which(spatstat::lengths.psp(datapsp)>0)]
+  if (!is.null(moreargs$maxlength)) {
+    datapsp = cut.psp(datapsp,moreargs$maxlength)
+  }
+
 
   return(datapsp)
 }
