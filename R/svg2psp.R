@@ -4,7 +4,6 @@
 #' @param bezier Parameters for approximating bezier curves (see Details).
 #' @param owin Specify a window for the \code{psp}. If \code{NULL}, use details in the SVG file.
 #' @param marks Add marks to segments (see details).
-#' @param svgmarks Use SVG segment id as mark.
 #' @param connect Assign segments to sets depending on their distance and orientation.
 #' @param upward,rightward directions of the segments (see details).
 #' @param rescale rescale \code{psp} to the dimensions given in the svg.
@@ -15,7 +14,7 @@
 #'
 #' Bezier quadratic and cubic curves are approximated using the De Casteljau algorithm. Quadratic bezier curves are first approximated by a cubic bezier curves. If \code{bezier}=0, bezier curves are converted to bezier polygons (i.e. goes through all control points). If \code{bezier}>0, Bezier curves are approximated by linear segments. The value of the parameter is the number of iterations used in the approximation (see \url{https://en.wikipedia.org/wiki/De_Casteljau's_algorithm} for details).
 #'
-#' The resulting \code{psp} can have marks attached. If \code{marks=1} and  \code{svgmark=F}, segments of the \code{psp} have a numeric mark depending on the SGV path they belong to. If \code{marks=1} and  \code{svgmark=T}, segments have the SVG path \code{id} as mark. If \code{marks=2}, all segments have a numeric mark depending on the SVG command that created them. If \code{marks=3}, all segments have a unique mark (for debug purposes). Defaults to \code{marks=0} which results in an unmarked \code{psp}.
+#' The resulting \code{psp} can have marks attached. If \code{marks=1}, segments of the \code{psp} have a numeric mark depending on the SGV path they belong to. If \code{marks=2}, all segments have a numeric mark depending on the SVG command that created them. If \code{marks=3}, all segments have a unique mark (for debug purposes). Defaults to \code{marks=0} which results in an unmarked \code{psp}. If \code{marks} is a character, then marks will be read from the corresponding field in the svg file.
 #'
 #' If \code{connect=T}, the resulting \code{psp} is processed through \link{connectedsets.psp}. The resulting \code{psp} will be a marked psp with each mark corresponding to a set.
 #'
@@ -33,7 +32,7 @@
 #' data = svg2psp(svgfile,reverse=TRUE,rescale=TRUE)
 #' plot(data)
 #' @export
-svg2psp = function(file,bezier=5,owin=NULL, marks=0, svgmarks=TRUE, connect = FALSE, upward=FALSE,rightward=FALSE,reverse=TRUE,rescale=TRUE,...) {
+svg2psp = function(file,bezier=5,owin=NULL, marks=NULL, connect = FALSE, upward=FALSE,rightward=FALSE,reverse=TRUE,rescale=TRUE,...) {
 
   moreargs = list(...)
 
@@ -76,15 +75,20 @@ svg2psp = function(file,bezier=5,owin=NULL, marks=0, svgmarks=TRUE, connect = FA
   }
 #operating on paths
   lpath = list()
-  segment_marks = unlist(XML::xpathApply(datasvg, "//path", XML::xmlGetAttr, "id")) ## get path id for (marks == 1 & svgmarks = T)
+  if (is.character(marks)) {
+    segment_marks = unlist(XML::xpathApply(datasvg, "//path", XML::xmlGetAttr, marks)) ## get path id for (marks == 1 & svgmarks = T)
+  }
   paths = XML::xpathApply(datasvg, "//path", XML::xmlGetAttr, "d")
   paths = gsub("([a-zA-Z])", " \\1 \\2", paths)
-  if (svgmarks & length(segment_marks) != length(paths)) {
-    segment_marks = 1:length(segment_marks)
-    warning("Number of segment id is different then number of paths in SVG file. Falling back to numbered marks")
+#  if (svgmarks & length(segment_marks) != length(paths)) {
+#    segment_marks = 1:length(segment_marks)
+#    warning("Number of segment id is different then number of paths in SVG file. Falling back to numbered marks")
+#  }
+  if (marks == 1) {
+    segment_marks = 1:length(paths)
   }
-  if (!svgmarks & marks == 1) {
-    segment_marks = 1:length(segment_marks)
+  if (is.character(marks)) {
+    marks=1
   }
   for (i in 1:length(paths)) {
     pos = c(0,0)
