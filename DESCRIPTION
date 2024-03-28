@@ -6,9 +6,9 @@ Author: Xavier Raynaud
 Maintainer: Xavier Raynaud <xavier.raynaud@sorbonne-universite.fr>
 Description: This package provides a set of function to convert SVG files into spatstat psp objects. 
 Imports:
-  spatstat,
+  spatstat.geom,
   XML
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.1.0
+RoxygenNote: 7.3.1

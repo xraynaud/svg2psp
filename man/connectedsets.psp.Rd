@@ -9,13 +9,15 @@ connectedsets.psp(psp, conn.radius = 0, conn.angle = 2 * pi)
 \arguments{
 \item{psp}{spatstat \code{psp} object.}
 
-\item{conn.radius, conn.angle}{segments will be assigned to belong to the same set if they have endings less than \code{conn.radius} units apart and if the form an angle less than \code{conn.angle}.}
+\item{conn.radius, conn.angle}{segments will be assigned to belong
+to the same set if they have endings less than \code{conn.radius}
+units apart and if the form an angle less than \code{conn.angle}.}
 }
 \description{
 Adds marks to connected segments in a psp
 }
 \examples{
-svgfile = system.file("extdata","SVG.svg", package = "svg2psp")
-data = svg2psp(svgfile,reverse=TRUE,rescale=TRUE)
+svgfile <- system.file("extdata", "SVG.svg", package = "svg2psp")
+data <- svg2psp(svgfile,reverse = TRUE, rescale = TRUE)
 plot(connectedsets.psp(data))
 }
